@@ -4,10 +4,15 @@ import utils
 import numpy as np
 from PIL import Image
 
+from hysteresis import hysterisis_kernel
 from non_max_suppression import non_max_suppression_kernel
 from sobel import sobel_kernel
 from src.grayscale import grayscale_kernel
 from src.gaussian import gaussian_kernel
+from threshold import threshold_kernel
+
+LOW_THRESHOLD = 51
+HIGH_THRESHOLD = 175
 
 
 def main(args):
@@ -59,16 +64,37 @@ def main(args):
         save_image(d_angles, str(path))
         return 0
 
-    # apply non_max_suppression_kernel
-    d_non_max_suppressed = cuda.device_array(image.shape[:2], dtype=np.float32)
+    # # apply non_max_suppression_kernel
+    # d_non_max_suppressed = cuda.device_array(image.shape[:2], dtype=np.float32)
+    #
+    # # apply the non-max suppression
+    # non_max_suppression_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_non_max_suppressed, d_angles)
+    # cuda.synchronize()
+    #
+    # if args.non_max_suppressed:
+    #     # save the non-max suppressed image
+    #     save_image(d_non_max_suppressed, args.outputImage)
+    #     return 0
 
-    # apply the non-max suppression
-    non_max_suppression_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_non_max_suppressed, d_angles)
+    d_output_threshold = cuda.device_array(image.shape[:2], dtype=np.float32)
+    # apply the threshold
+    threshold_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_output_threshold, LOW_THRESHOLD,
+                                                         HIGH_THRESHOLD)
     cuda.synchronize()
 
-    if args.non_max_suppressed:
-        # save the non-max suppressed image
-        save_image(d_non_max_suppressed, args.outputImage)
+    if args.threshold:
+        # save the threshold image
+        save_image(d_output_threshold, args.outputImage)
+        return 0
+
+    # apply hysteresis
+    d_output_hysteresis = cuda.device_array(image.shape[:2], dtype=np.uint8)
+    hysterisis_kernel[blocks_per_grid, threads_per_block](d_output_threshold, d_output_hysteresis)
+    cuda.synchronize()
+
+    if args.hysteresis:
+        # save the hysteresis image
+        save_image(d_output_hysteresis, args.outputImage)
         return 0
 
 

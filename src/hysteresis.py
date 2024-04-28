@@ -3,7 +3,7 @@ from numba import cuda
 
 
 @cuda.jit
-def hysterisis(input_array, output_array):
+def hysterisis_kernel(input_array, output_array):
     x, y = cuda.grid(2)
     if x < input_array.shape[0] and y < input_array.shape[1]:
         if input_array[x, y] == 128:

@@ -13,6 +13,9 @@ class Test(TestCase):
             gauss = False
             sobel = False
             non_max_suppressed = False
+            threshold = False
+
+            hysteresis = False
 
 
         args = Args()
@@ -34,6 +37,17 @@ class Test(TestCase):
         args = Args()
         args.non_max_suppressed = True
         args.outputImage = './data/output/test_non_max_suppressed.jpg'
+        main(args)
+
+        args = Args()
+        args.threshold = True
+        args.outputImage = './data/output/test_threshold.jpg'
+        main(args)
+
+
+        args = Args()
+        args.hysteresis = True
+        args.outputImage = './data/output/test_hysteresis.jpg'
         main(args)
 
 
