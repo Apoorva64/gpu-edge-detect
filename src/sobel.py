@@ -26,5 +26,9 @@ def sobel_kernel(input_image, output_image, angles):
 
         # clamp values to 0-175
         output_image[x + 1, y + 1] = math.sqrt(gx ** 2 + gy ** 2)
+        if output_image[x + 1, y + 1] > 175:
+            output_image[x + 1, y + 1] = 175
+        if output_image[x + 1, y + 1] < 0:
+            output_image[x + 1, y + 1] = 0
         # arctan2 for angles
         angles[x + 1, y + 1] = cmath.phase(complex(gx, gy))
