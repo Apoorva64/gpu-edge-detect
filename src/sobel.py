@@ -15,7 +15,8 @@ def sobel_kernel(input_image, output_image, angles):
     """
     x, y = cuda.grid(2)
 
-    if x < input_image.shape[0] - 2 and y < input_image.shape[1] - 2:
+    if input_image.shape[0] - 2 > x > 0 and input_image.shape[1] - 2 > y > 0:
+        output_image[x + 1, y + 1] = 0
         gx = (input_image[x, y] - input_image[x + 2, y] +
               2 * input_image[x, y + 1] - 2 * input_image[x + 2, y + 1] +
               input_image[x, y + 2] - input_image[x + 2, y + 2])
