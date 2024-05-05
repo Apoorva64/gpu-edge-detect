@@ -75,7 +75,7 @@ def main(args):
         return 0
 
     # apply hysteresis
-    d_output_hysteresis = cuda.device_array(image.shape[:2], dtype=np.uint8)
+    d_output_hysteresis = cuda.device_array(image.shape[:2], dtype=np.float32)
     hysterisis_kernel[blocks_per_grid, threads_per_block](d_output_threshold, d_output_hysteresis)
     cuda.synchronize()
 
