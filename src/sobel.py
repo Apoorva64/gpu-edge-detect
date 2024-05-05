@@ -49,7 +49,7 @@ def sobel_kernel(input_image, output_image):
             gy = 175
 
         # clamp values to 0-175
-        output_image[x, y] = math.sqrt(gx ** 2 + gy ** 2)
+        output_image[x, y] = int(math.ceil(math.sqrt(gx ** 2 + gy ** 2)))
 
 @cuda.jit
 def sobel_kernel_with_angle(input_image, output_image):
@@ -94,4 +94,4 @@ def sobel_kernel_with_angle(input_image, output_image):
             gy = 175
 
         # clamp values to 0-175
-        output_image[x, y] = math.sqrt(gx ** 2 + gy ** 2)
+        output_image[x, y] = int(math.ceil(math.sqrt(gx ** 2 + gy ** 2)))
