@@ -8,22 +8,34 @@ from numba import cuda
 @cuda.jit
 def sobel_kernel(input_image, output_image):
     """
-    Applies the sobel operator to an image.
-    :param input_image:
-    :param output_image:
-    :return:
+    Applies the Sobel operator to an image.
+    :param input_image: Input image array
+    :param output_image: Output image array to store the result
+    :return: None
     """
     def secure_access(n, shape):
+        """
+        Helper function to access array indices securely.
+        :param n: Index
+        :param shape: Shape of the array
+        :return: Valid index within array bounds
+        """
+        # If index is negative, return its absolute value
         if n < 0:
             return -n
+        # If index is greater than or equal to array shape, return a valid index within array bounds
         if n >= shape:
             diff = (shape - n) + 1
             return shape - diff
+        # Otherwise, return the index itself
         return n
 
+    # Get the thread indices in a 2D grid
     x, y = cuda.grid(2)
 
+    # Check if the thread indices are within the bounds of the input_image
     if input_image.shape[0] > x and input_image.shape[1] > y:
+        # Calculate the horizontal gradient (gx)
         gx = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] +
               2 * input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y, input_image.shape[1])] - 2 *
@@ -31,6 +43,7 @@ def sobel_kernel(input_image, output_image):
               input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])])
 
+        # Calculate the vertical gradient (gy)
         gy = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])] +
               2 * input_image[secure_access(x, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] - 2 *
@@ -38,52 +51,14 @@ def sobel_kernel(input_image, output_image):
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])])
 
-        # clamp values to 0-175
-        output_image[x, y] = math.sqrt(gx ** 2 + gy ** 2)
-        if output_image[x, y] > 175:
-            output_image[x, y] = 175
-        if output_image[x, y] < 0:
-            output_image[x, y] = 0
-@cuda.jit
-def sobel_kernel_with_angle(input_image, output_image):
-    """
-    Applies the sobel operator to an image.
-    :param input_image:
-    :param output_image:
-    :return:
-    """
-    def secure_access(n, shape):
-        if n < 0:
-            return -n
-        if n >= shape:
-            diff = (shape - n) + 1
-            return shape - diff
-        return n
-    x, y = cuda.grid(2)
+        # Compute the gradient magnitude
+        gradient_magnitude = math.sqrt(gx ** 2 + gy ** 2)
 
-    if input_image.shape[0] > x and input_image.shape[1] > y:
-        gx = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
-              input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] +
-              2 * input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y, input_image.shape[1])] - 2 *
-              input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y, input_image.shape[1])] +
-              input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])] -
-              input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])])
+        # Clamp values to the range [0, 175]
+        if gradient_magnitude > 175:
+            gradient_magnitude = 175
+        if gradient_magnitude < 0:
+            gradient_magnitude = 0
 
-        gy = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
-              input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])] +
-              2 * input_image[secure_access(x, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] - 2 *
-              input_image[secure_access(x, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])] +
-              input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
-              input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])])
-
-        if gx < 0:
-            gx = 0
-        if gy < 0:
-            gy = 0
-        if gx > 175:
-            gx = 175
-        if gy > 175:
-            gy = 175
-
-        # clamp values to 0-175
-        output_image[x, y] = int(math.ceil(math.sqrt(gx ** 2 + gy ** 2)))
+        # Store the gradient magnitude in the output_image
+        output_image[x, y] = gradient_magnitude

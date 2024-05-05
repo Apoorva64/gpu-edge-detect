@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src.main import main
+from src.project_gpu import main
 from    pathlib import Path
 
 class Test(TestCase):
