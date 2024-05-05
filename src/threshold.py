@@ -11,4 +11,4 @@ def threshold_kernel(non_max_suppressed, output_array, low, high):
         elif non_max_suppressed[x, y] < low:
             output_array[x, y] = 0
         else:
-            output_array[x, y] = 25
+            output_array[x, y] = 127
