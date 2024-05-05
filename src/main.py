@@ -30,58 +30,56 @@ def main(args):
     d_image = cuda.to_device(image)
 
     # Create 2d array for the grayscale image
-    d_output_grayscale = cuda.device_array(image.shape[:2], dtype=np.float32)
+    buffer_1 = cuda.device_array(image.shape[:2], dtype=np.float32)
 
     # Perform the grayscale operation
     threads_per_block, blocks_per_grid = utils.get_grid_block(image)
-    grayscale_kernel[blocks_per_grid, threads_per_block](d_image, d_output_grayscale)
+    grayscale_kernel[blocks_per_grid, threads_per_block](d_image, buffer_1)
     cuda.synchronize()
 
     if args.bw:
         # save the grayscale image
-        save_image(d_output_grayscale, args.outputImage)
+        save_image(buffer_1, args.outputImage)
         return 0
 
-    d_output_gaussian = cuda.device_array(image.shape[:2], dtype=np.float32)
+    buffer_2 = cuda.device_array(image.shape[:2], dtype=np.float32)
     # apply the gaussian filter
-    gaussian_local_copy_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_output_gaussian)
+    gaussian_local_copy_kernel[blocks_per_grid, threads_per_block](buffer_1, buffer_2)
     cuda.synchronize()
 
     if args.gauss:
         # save the gaussian image
-        save_image(d_output_gaussian, args.outputImage)
+        save_image(buffer_2, args.outputImage)
         return 0
 
     # apply the sobel filter
-    sobel_kernel[blocks_per_grid, threads_per_block](d_output_gaussian, d_output_grayscale)
+    sobel_kernel[blocks_per_grid, threads_per_block](buffer_2, buffer_1)
     cuda.synchronize()
 
     if args.sobel:
         # save the sobel image
-        save_image(d_output_grayscale, args.outputImage)
+        save_image(buffer_1, args.outputImage)
         return 0
 
     cuda.synchronize()
 
-    d_output_threshold = cuda.device_array(image.shape[:2], dtype=np.float32)
     # apply the threshold
-    threshold_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_output_threshold, LOW_THRESHOLD,
+    threshold_kernel[blocks_per_grid, threads_per_block](buffer_1, buffer_2, LOW_THRESHOLD,
                                                          HIGH_THRESHOLD)
     cuda.synchronize()
 
     if args.threshold:
         # save the threshold image
-        save_image(d_output_threshold, args.outputImage)
+        save_image(buffer_2, args.outputImage)
         return 0
 
     # apply hysteresis
-    d_output_hysteresis = cuda.device_array(image.shape[:2], dtype=np.float32)
-    hysterisis_kernel[blocks_per_grid, threads_per_block](d_output_threshold, d_output_hysteresis)
+    hysterisis_kernel[blocks_per_grid, threads_per_block](buffer_2, buffer_1)
     cuda.synchronize()
 
     if args.hysteresis:
         # save the hysteresis image
-        save_image(d_output_hysteresis, args.outputImage)
+        save_image(buffer_1, args.outputImage)
         return 0
 
 
