@@ -75,10 +75,9 @@ def main(args):
     hysterisis_kernel[blocks_per_grid, threads_per_block](buffer_2, buffer_1)
     cuda.synchronize()
 
-    if args.hysteresis:
-        # save the hysteresis image
-        save_image(buffer_1, args.outputImage)
-        return 0
+    # save the hysteresis image
+    save_image(buffer_1, args.outputImage)
+    return 0
 
 
 def save_image(d_image, output_image_path):
