@@ -39,18 +39,12 @@ def sobel_kernel(input_image, output_image):
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y + 1, input_image.shape[1])])
 
-        if gx < 0:
-            gx = 0
-        if gy < 0:
-            gy = 0
-        if gx > 175:
-            gx = 175
-        if gy > 175:
-            gy = 175
-
         # clamp values to 0-175
-        output_image[x, y] = int(math.ceil(math.sqrt(gx ** 2 + gy ** 2)))
-
+        output_image[x, y] = math.sqrt(gx ** 2 + gy ** 2)
+        if output_image[x, y] > 175:
+            output_image[x, y] = 175
+        if output_image[x, y] < 0:
+            output_image[x, y] = 0
 @cuda.jit
 def sobel_kernel_with_angle(input_image, output_image):
     """
