@@ -256,3 +256,4 @@ cython_debug/
 #.idea/
 
 test/data/output/**.jpg
+share

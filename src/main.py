@@ -113,7 +113,9 @@ if __name__ == '__main__':
     parser.add_argument('--gauss', action='store_true', help='perform the bw_kernel and the gauss_kernel')
     parser.add_argument('--sobel', action='store_true',
                         help='perform all kernels up to sobel_kernel  and write to disk the magnitude of each pixel')
+    parser.add_argument('--non_max_suppressed', action='store_true', help='perform the non_max_suppressed')
     parser.add_argument('--threshold', action='store_true', help='perform all kernels up to threshold_kernel')
+    parser.add_argument('--hysteresis', action='store_true', help='perform hysteresis')
     parser.add_argument('inputImage', type=str, help='the source image')
     parser.add_argument('outputImage', type=str, help='the destination image')
 

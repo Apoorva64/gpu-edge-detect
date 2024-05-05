@@ -6,7 +6,7 @@ class Test(TestCase):
     def test_integration(self):
         # mock the arguments
         class Args:
-            inputImage = './data/input/test.jpg'
+            inputImage = './data/input/test.png'
             outputImage = './data/output/test_bw.jpg'
             tb = 32
             bw = False
