@@ -61,8 +61,6 @@ def main(args):
         save_image(buffer_1, args.outputImage)
         return 0
 
-    cuda.synchronize()
-
     # apply the threshold
     threshold_kernel[blocks_per_grid, threads_per_block](buffer_1, buffer_2, LOW_THRESHOLD,
                                                          HIGH_THRESHOLD)
