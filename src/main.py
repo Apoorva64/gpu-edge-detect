@@ -51,34 +51,21 @@ def main(args):
         # save the gaussian image
         save_image(d_output_gaussian, args.outputImage)
         return 0
-    d_angles = cuda.device_array(image.shape[:2], dtype=np.float32)
+
     # apply the sobel filter
-    sobel_kernel[blocks_per_grid, threads_per_block](d_output_gaussian, d_output_grayscale, d_angles)
+    sobel_kernel[blocks_per_grid, threads_per_block](d_output_gaussian, d_output_grayscale)
     cuda.synchronize()
 
     if args.sobel:
         # save the sobel image
         save_image(d_output_grayscale, args.outputImage)
-        path = Path(args.outputImage)
-        path = path.parent / (path.stem + "_angles" + path.suffix)
-        save_image(d_angles, str(path))
         return 0
 
-    # # apply non_max_suppression_kernel
-    d_non_max_suppressed = cuda.device_array(image.shape[:2], dtype=np.float32)
-
-    # apply the non-max suppression
-    non_max_suppression_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_non_max_suppressed, d_angles)
     cuda.synchronize()
-
-    if args.non_max_suppressed:
-        # save the non-max suppressed image
-        save_image(d_non_max_suppressed, args.outputImage)
-        return 0
 
     d_output_threshold = cuda.device_array(image.shape[:2], dtype=np.float32)
     # apply the threshold
-    threshold_kernel[blocks_per_grid, threads_per_block](d_non_max_suppressed, d_output_threshold, LOW_THRESHOLD,
+    threshold_kernel[blocks_per_grid, threads_per_block](d_output_grayscale, d_output_threshold, LOW_THRESHOLD,
                                                          HIGH_THRESHOLD)
     cuda.synchronize()
 
