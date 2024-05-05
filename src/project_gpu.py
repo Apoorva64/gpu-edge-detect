@@ -320,7 +320,6 @@ def save_image(d_image, output_image_path):
 
 
 if __name__ == '__main__':
-
     import argparse
 
     parser = argparse.ArgumentParser(description='Process some integers.')
