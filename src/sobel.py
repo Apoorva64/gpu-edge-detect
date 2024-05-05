@@ -24,7 +24,6 @@ def sobel_kernel(input_image, output_image):
     x, y = cuda.grid(2)
 
     if input_image.shape[0] > x and input_image.shape[1] > y:
-        output_image[x, y] = 0
         gx = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] +
               2 * input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y, input_image.shape[1])] - 2 *
@@ -69,7 +68,6 @@ def sobel_kernel_with_angle(input_image, output_image):
     x, y = cuda.grid(2)
 
     if input_image.shape[0] > x and input_image.shape[1] > y:
-        output_image[x, y] = 0
         gx = (input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] -
               input_image[secure_access(x + 1, input_image.shape[0]), secure_access(y - 1, input_image.shape[1])] +
               2 * input_image[secure_access(x - 1, input_image.shape[0]), secure_access(y, input_image.shape[1])] - 2 *
